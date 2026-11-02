@@ -27,3 +27,7 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.named<JavaExec>("bootRun") {
+    workingDir = rootProject.projectDir
+}

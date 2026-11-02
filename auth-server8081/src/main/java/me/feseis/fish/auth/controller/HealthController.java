@@ -37,17 +37,11 @@ public class HealthController {
     }
 
     private boolean checkRedis() {
-        RedisConnection connection = null;
-        try {
-            connection = stringRedisTemplate.getConnectionFactory().getConnection();
+        try (RedisConnection connection = stringRedisTemplate.getConnectionFactory().getConnection()) {
             connection.ping();
             return true;
         } catch (Exception e) {
             return false;
-        } finally {
-            if (connection != null) {
-                connection.close();
-            }
         }
     }
 

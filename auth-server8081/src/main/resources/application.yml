@@ -5,7 +5,7 @@ spring:
   application:
     name: auth-server
   config:
-    import: optional:file:../a_run_env/auth.env[.properties]
+    import: optional:file:./a_run_env/auth.env[.properties]
   datasource:
     url: ${AUTH_DB_URL}
     username: ${AUTH_DB_USERNAME}
