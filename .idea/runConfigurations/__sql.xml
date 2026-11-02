@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="初始化数据库-建表.sql" type="DatabaseScript" editBeforeRun="true">
+    <script-file value="$PROJECT_DIR$/.ai/doc/建库/建库.sql" />
+    <script-mode>FILE</script-mode>
+    <data-source id="4ee802b3-50f4-4455-831d-a9e8f0d9dbd0" />
+    <method v="2" />
+  </configuration>
+</component>
