@@ -8,11 +8,16 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     PWD_WRONG(HttpStatus.UNAUTHORIZED, "手机号或密码错误"),
+    SMS_WRONG(HttpStatus.UNAUTHORIZED, "验证码错误"),
+    SMS_EXPIRED(HttpStatus.UNAUTHORIZED, "验证码已过期"),
     NO_ACCOUNT(HttpStatus.UNAUTHORIZED, "账号不存在"),
     FROZEN(HttpStatus.FORBIDDEN, "账号已冻结"),
+    CLOSED(HttpStatus.FORBIDDEN, "账号已注销"),
+    PHONE_EXISTS(HttpStatus.CONFLICT, "手机号已注册"),
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "登录已失效"),
     INVALID_PARAM(HttpStatus.BAD_REQUEST, "参数校验失败"),
     RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS, "请求过于频繁"),
+    SMS_SEND_FAILED(HttpStatus.BAD_GATEWAY, "验证码发送失败"),
     NOT_FOUND(HttpStatus.NOT_FOUND, "资源不存在"),
     INTERNAL(HttpStatus.INTERNAL_SERVER_ERROR, "系统内部错误");
 

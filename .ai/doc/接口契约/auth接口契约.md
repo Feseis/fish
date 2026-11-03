@@ -19,9 +19,17 @@
 | 接口 | 方法 | 状态 | 说明 |
 | --- | --- | --- | --- |
 | `/auth/health` | GET | 已实现 | 数据库与 Redis 组件状态；全 UP 返回 200，任一 DOWN 返回 503 |
-| `/auth/login` | POST | 规划中 | 手机号 + 密码登录，签发短期令牌与 refresh |
-| `/auth/refresh` | POST | 规划中 | 用 refresh 换新短期令牌 |
-| `/auth/logout` | POST | 规划中 | 结束当前会话 |
+| `/auth/get-sms-code` | POST | 已实现 | 入参手机号，生成验证码并投递到 fish-pbox；60 秒内重复调用返回 `RATE_LIMITED` |
+| `/auth/register` | POST | 已实现 | 手机号 + 验证码 + 密码注册，成功即自动登录，返回 201 与登录出参 |
+| `/auth/login/password` | POST | 已实现 | 手机号 + 密码登录，签发短期令牌与 refresh |
+| `/auth/login/sms` | POST | 已实现 | 手机号 + 验证码登录，签发短期令牌与 refresh |
+| `/auth/refresh` | POST | 已实现 | 读 refresh cookie，签发新短期令牌；refresh 不轮换 |
+| `/auth/logout` | POST | 已实现 | 结束会话并吊销请求携带的短期令牌，清 cookie；幂等 |
+| `/auth/verify` | POST | 已实现 | 校验短期令牌，返回 `sessionId`、`accountId`、`roles`；供下游服务换取身份 |
+
+`/auth/verify` 的令牌放在 `Authorization: Bearer <accessToken>`，与 `/auth/logout` 一致；
+令牌无效或已登出返回 401 `TOKEN_EXPIRED`。该校验只读 Redis 与角色表，
+不再复核账号状态与密码版本，冻结/改密的收敛点在 `/auth/refresh`。
 
 规划中接口在实现前不得被前端按已完成对接。
 
@@ -51,4 +59,4 @@
 
 以 `me.feseis.fish.auth.exp.ErrorCode` 为准，不在文档内复制枚举，避免两处不一致。当前已定义：
 
-`PWD_WRONG`、`NO_ACCOUNT`、`FROZEN`、`TOKEN_EXPIRED`、`INVALID_PARAM`、`RATE_LIMITED`、`NOT_FOUND`、`INTERNAL`。
+`PWD_WRONG`、`SMS_WRONG`、`SMS_EXPIRED`、`NO_ACCOUNT`、`FROZEN`、`CLOSED`、`PHONE_EXISTS`、`TOKEN_EXPIRED`、`INVALID_PARAM`、`RATE_LIMITED`、`SMS_SEND_FAILED`、`NOT_FOUND`、`INTERNAL`。

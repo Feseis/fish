@@ -25,3 +25,17 @@ spring:
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
+
+auth:
+  token:
+    access-ttl: 2h
+    refresh-ttl: 7d
+  cookie:
+    secure: false
+  sms:
+    code-ttl: 5m
+    resend-interval: 60s
+    pbox:
+      base-url: ${PBOX_BASE_URL}
+      sender-phone: ${PBOX_SENDER_PHONE}
+      api-code: ${PBOX_API_CODE}

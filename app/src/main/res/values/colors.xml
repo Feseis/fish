@@ -2,4 +2,10 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="fish_primary">#FF1677FF</color>
+    <color name="fish_bg_top">#FFE7F1FF</color>
+    <color name="fish_bg_bottom">#FFF8FBFF</color>
+    <color name="fish_text_primary">#FF17233D</color>
+    <color name="fish_text_secondary">#FF6B7A91</color>
+    <color name="fish_card_stroke">#FFE5EDF8</color>
 </resources>
