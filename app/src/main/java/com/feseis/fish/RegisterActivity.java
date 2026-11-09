@@ -17,7 +17,6 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.feseis.fish.auth.api.AuthApi;
 import com.feseis.fish.auth.api.AuthApiProvider;
-import com.feseis.fish.auth.api.MockAuthApi;
 import com.feseis.fish.auth.model.ApiCallback;
 import com.feseis.fish.auth.model.AuthError;
 import com.feseis.fish.auth.model.LoginResult;
@@ -150,9 +149,7 @@ public class RegisterActivity extends AppCompatActivity {
                     return;
                 }
                 if (result.isSuccess()) {
-                    Toast.makeText(this,
-                            this.getString(R.string.login_code_sent_format, MockAuthApi.MOCK_SMS_CODE),
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.login_code_sent, Toast.LENGTH_SHORT).show();
                     this.startCountdown();
                 } else {
                     this.sendCodeButton.setEnabled(true);
@@ -176,7 +173,7 @@ public class RegisterActivity extends AppCompatActivity {
                 if (result.isSuccess()) {
                     SessionStore.get().save(result.getData());
                     Toast.makeText(this, R.string.register_success, Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(this, MainActivity.class);
+                    Intent intent = new Intent(this, SessionActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     this.startActivity(intent);
                     this.finish();

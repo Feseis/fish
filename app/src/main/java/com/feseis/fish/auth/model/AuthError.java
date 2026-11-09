@@ -19,6 +19,7 @@ public final class AuthError {
     public static final String NOT_FOUND = "NOT_FOUND";
     public static final String INTERNAL = "INTERNAL";
     public static final String NETWORK = "NETWORK";
+    public static final String ENDPOINT_MISSING = "ENDPOINT_MISSING";
 
     private final String code;
     private final String message;

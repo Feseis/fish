@@ -45,6 +45,8 @@ bin/
 ### Android ###
 local.properties
 captures/
+keystore/
+key.properties
 .externalNativeBuild/
 .cxx/
 *.apk

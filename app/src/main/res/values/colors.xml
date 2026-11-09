@@ -8,4 +8,7 @@
     <color name="fish_text_primary">#FF17233D</color>
     <color name="fish_text_secondary">#FF6B7A91</color>
     <color name="fish_card_stroke">#FFE5EDF8</color>
+    <color name="fish_success">#FF18A058</color>
+    <color name="fish_warning">#FFB76E00</color>
+    <color name="fish_error">#FFD03050</color>
 </resources>

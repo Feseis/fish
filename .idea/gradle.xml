@@ -11,7 +11,11 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/auth-server8081" />
+            <option value="$PROJECT_DIR$/contract" />
+            <option value="$PROJECT_DIR$/server8081-auth" />
+            <option value="$PROJECT_DIR$/server8082-logistics" />
+            <option value="$PROJECT_DIR$/server8083-payment" />
+            <option value="$PROJECT_DIR$/server8084-sms" />
           </set>
         </option>
       </GradleProjectSettings>

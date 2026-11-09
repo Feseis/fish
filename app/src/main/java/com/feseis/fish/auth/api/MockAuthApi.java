@@ -6,6 +6,7 @@ import android.os.Looper;
 import com.feseis.fish.auth.model.ApiCallback;
 import com.feseis.fish.auth.model.ApiResult;
 import com.feseis.fish.auth.model.AuthError;
+import com.feseis.fish.auth.model.HealthResult;
 import com.feseis.fish.auth.model.LoginResult;
 import com.feseis.fish.auth.model.RefreshResult;
 import com.feseis.fish.auth.model.VerifyResult;
@@ -140,6 +141,11 @@ public final class MockAuthApi implements AuthApi {
         }
         this.reply(ApiResult.success(new VerifyResult(MOCK_SESSION_ID, this.current.getAccountId(),
                 this.current.getRoles())), callback);
+    }
+
+    @Override
+    public void checkHealth(ApiCallback<HealthResult> callback) {
+        this.reply(ApiResult.success(new HealthResult(true, true)), callback);
     }
 
     private boolean isKnownPhone(String phone) {

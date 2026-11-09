@@ -7,5 +7,9 @@ pluginManagement {
     }
 }
 rootProject.name = "fish"
-include("auth-server8081")
+include("server8081-auth")
+include("server8082-logistics")
+include("server8083-payment")
+include("server8084-sms")
 include("app")
+include("contract")

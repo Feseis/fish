@@ -34,21 +34,25 @@ build 权限仅限当轮，下一轮自动回到 plan。
 ## 5. 未覆盖情形
 规则未覆盖或存在歧义 → 默认拒绝执行，先提问或给出方案。
 
-## 7. 改完回写
+## 6. 改完回写
 本轮产生的定型结论写进 `.ai/doc/决策日志/`，未完成事项写进 `.ai/doc/待办/`，操作步骤写进 `.ai/doc/操作手册/`；不新建平行文档。
 
-## 8. 项目
+## 7. 项目
 fish 是快递系统毕业设计（飞鱼速递）。Java 21 / Spring Boot 4.1.2 / MyBatis / Flyway / MySQL / Redis，Gradle 多模块。
 
-## 9. 模块
+## 8. 模块
 
 | 模块 | 身份 | 端口 | 数据库 | 说明 |
 | --- | --- | --- | --- | --- |
-| `auth-server8081` | `auth-server` | 8081 | `fish_auth` | 独立认证服务 |
+| `server8081-auth` | `auth-server` | 8081 | `fish_auth` | 独立认证服务 |
+| `server8082-logistics` | `logistics-server` | 8082 | `fish_logistics` | 物流业务服务 |
+| `server8083-payment` | `payment-server` | 8083 | `fish_payment` | 支付服务 |
+| `server8084-sms` | `sms-server` | 8084 | `fish_sms` | 短信服务 |
+| `contract` | - | - | - | 纯 Java 跨端协议常量，无 Spring/Android 依赖 |
 | `app` | - | - | - | Android 客户端 |
 | `common` | - | - | - | 目录保留，已移出 settings |
 
-## 10. 文档地图
+## 9. 文档地图
 
 ```text
 .ai/doc/规范/       稳定约束｜写代码前读，改约束时写

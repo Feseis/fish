@@ -1,11 +1,29 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
+}
+
+val keystoreProps = Properties().apply {
+    val file = rootProject.file("key.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
 }
 
 android {
     namespace = "com.feseis.fish"
     compileSdk = 36
     buildToolsVersion = "36.1.0"
+
+    signingConfigs {
+        if (keystoreProps.isNotEmpty()) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
 
     defaultConfig {
         applicationId = "com.feseis.fish"
@@ -20,6 +38,9 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            if (keystoreProps.isNotEmpty()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 
@@ -27,9 +48,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
+    implementation(project(":contract"))
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.activity:activity:1.13.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
