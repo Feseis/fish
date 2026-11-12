@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
 
     <application
         android:name=".FishApp"
@@ -15,6 +20,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Fish"
         android:usesCleartextTraffic="true">
+
+        <meta-data
+            android:name="com.amap.api.v2.apikey"
+            android:value="${amapKey}" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -35,6 +45,24 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".SessionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HomeActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".StaffApplyActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".AddressBookActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AddressEditActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".PoiPickerActivity"
             android:exported="false" />
     </application>
 

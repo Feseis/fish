@@ -13,6 +13,7 @@ public final class AuthError {
     public static final String CLOSED = "CLOSED";
     public static final String PHONE_EXISTS = "PHONE_EXISTS";
     public static final String TOKEN_EXPIRED = "TOKEN_EXPIRED";
+    public static final String UNAUTHORIZED = "UNAUTHORIZED";
     public static final String INVALID_PARAM = "INVALID_PARAM";
     public static final String RATE_LIMITED = "RATE_LIMITED";
     public static final String SMS_SEND_FAILED = "SMS_SEND_FAILED";

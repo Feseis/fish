@@ -26,13 +26,16 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.feseis.fish"
+        applicationId = "me.feseis.fish"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // 高德 Key 不入库：由根目录 key.properties 提供；缺失时打包仍可通过，但地图不可用
+        manifestPlaceholders["amapKey"] = keystoreProps.getProperty("amapKey") ?: ""
     }
 
     buildTypes {
@@ -60,6 +63,9 @@ dependencies {
     implementation("androidx.activity:activity:1.13.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("com.google.android.material:material:1.10.0")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    // 3dmap 包已内置定位 SDK，单独再加 com.amap.api:location 会产生重复类
+    implementation("com.amap.api:3dmap:10.0.600")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

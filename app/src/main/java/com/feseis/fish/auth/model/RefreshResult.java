@@ -1,7 +1,7 @@
 package com.feseis.fish.auth.model;
 
 /**
- * 对应后端 RefreshResponse；refresh 令牌不轮换，响应只回新的短期令牌。
+ * 对应后端 RefreshRespVO；refresh 令牌不轮换，响应只回新的短期令牌。
  */
 public final class RefreshResult {
 

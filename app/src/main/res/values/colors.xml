@@ -11,4 +11,5 @@
     <color name="fish_success">#FF18A058</color>
     <color name="fish_warning">#FFB76E00</color>
     <color name="fish_error">#FFD03050</color>
+    <color name="fish_placeholder">#FFD9D9D9</color>
 </resources>

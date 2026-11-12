@@ -198,7 +198,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (result.isSuccess()) {
                     SessionStore.get().save(result.getData());
                     Toast.makeText(this, R.string.login_success, Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(this, SessionActivity.class);
+                    Intent intent = new Intent(this, HomeActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     this.startActivity(intent);
                     this.finish();

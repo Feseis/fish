@@ -2,7 +2,6 @@ package com.feseis.fish;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,19 +17,17 @@ import com.feseis.fish.auth.api.AuthApiProvider;
 import com.feseis.fish.auth.config.AuthEndpoint;
 import com.feseis.fish.auth.model.AuthError;
 import com.feseis.fish.auth.model.HealthResult;
-import com.feseis.fish.auth.model.LoginResult;
 import com.feseis.fish.auth.store.SessionStore;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+/**
+ * 启动页：服务地址配置 + 登录入口。
+ * 地址输入只收 IP，端口固定为 auth 服务的 8081。
+ */
 public class MainActivity extends AppCompatActivity {
 
-    private TextView loginState;
-    private View infoGroup;
-    private TextView accountInfo;
-    private TextView roleInfo;
-    private TextView expireInfo;
     private MaterialButton goLoginButton;
     private MaterialButton logoutButton;
     private View devPanel;
@@ -63,11 +60,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void bindViews() {
-        this.loginState = this.findViewById(R.id.tv_login_state);
-        this.infoGroup = this.findViewById(R.id.info_group);
-        this.accountInfo = this.findViewById(R.id.tv_account_info);
-        this.roleInfo = this.findViewById(R.id.tv_role_info);
-        this.expireInfo = this.findViewById(R.id.tv_expire_info);
         this.goLoginButton = this.findViewById(R.id.btn_go_login);
         this.logoutButton = this.findViewById(R.id.btn_logout);
         this.devPanel = this.findViewById(R.id.dev_panel);
@@ -78,23 +70,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshUi() {
-        LoginResult session = SessionStore.get().getSession();
-        boolean loggedIn = session != null;
-        this.loginState.setText(loggedIn ? R.string.main_logged_in : R.string.main_not_logged_in);
-        this.infoGroup.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
-        this.logoutButton.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+        boolean loggedIn = SessionStore.get().isLoggedIn();
         this.goLoginButton.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
-        if (!loggedIn) {
-            this.accountInfo.setText("");
-            this.roleInfo.setText("");
-            this.expireInfo.setText("");
-            return;
-        }
-        this.accountInfo.setText(this.getString(R.string.main_account_format, session.getPhone()));
-        this.roleInfo.setText(this.getString(R.string.main_roles_format,
-                TextUtils.join(", ", session.getRoles())));
-        this.expireInfo.setText(this.getString(R.string.main_expire_format,
-                formatExpiry(session.getAccessExpiresAt())));
+        this.logoutButton.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
     }
 
     private void logout() {
@@ -115,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         if (!BuildConfig.DEBUG) {
             return;
         }
-        this.endpointInput.setText(AuthEndpoint.get(this));
+        this.endpointInput.setText(AuthEndpoint.host(this));
         this.renderEndpointStatus();
         this.testEndpointButton.setOnClickListener(v -> this.testEndpoint());
     }
@@ -129,15 +107,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void testEndpoint() {
-        String normalized = AuthEndpoint.normalize(this.endpointInput.getText() == null
-                ? "" : this.endpointInput.getText().toString());
+        String raw = this.endpointInput.getText() == null
+                ? "" : this.endpointInput.getText().toString();
+        String normalized = AuthEndpoint.normalize(raw);
         if (!AuthEndpoint.isValid(normalized)) {
             this.endpointLayout.setError(this.getString(R.string.dev_connect_invalid));
             return;
         }
         this.endpointLayout.setError(null);
-        AuthEndpoint.save(this, normalized);
-        this.endpointInput.setText(normalized);
+        AuthEndpoint.save(this, raw);
+        this.endpointInput.setText(AuthEndpoint.host(this));
         this.setEndpointTesting(true);
         AuthApiProvider.get().checkHealth(result -> {
             if (this.isFinishing() || this.isDestroyed()) {
@@ -176,13 +155,5 @@ public class MainActivity extends AppCompatActivity {
     private void showEndpointStatus(String text, int colorRes) {
         this.endpointStatus.setText(text);
         this.endpointStatus.setTextColor(ContextCompat.getColor(this, colorRes));
-    }
-
-    private static String formatExpiry(String raw) {
-        if (raw == null || raw.isEmpty()) {
-            return "-";
-        }
-        String value = raw.length() > 19 ? raw.substring(0, 19) : raw;
-        return value.replace('T', ' ');
     }
 }

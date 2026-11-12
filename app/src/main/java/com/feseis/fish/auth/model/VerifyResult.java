@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 对应后端 VerifyResponse：下游凭此获得调用者身份与角色。
+ * 对应后端 VerifyRespVO：下游凭此获得调用者身份与角色。
  */
 public final class VerifyResult {
 

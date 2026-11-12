@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 对应后端 LoginResponse；accessExpiresAt 保留后端返回的字符串，避免客户端做时区换算。
+ * 对应后端 LoginRespVO；accessExpiresAt 保留后端返回的字符串，避免客户端做时区换算。
  */
 public final class LoginResult {
 

@@ -37,7 +37,6 @@ public class RegisterActivity extends AppCompatActivity {
     private static final Pattern PHONE_PATTERN = Pattern.compile("^1[3-9]\\d{9}$");
     private static final Pattern CODE_PATTERN = Pattern.compile("^\\d{6}$");
     private static final int COUNTDOWN_SECONDS = 60;
-    private static final int PASSWORD_MIN_LENGTH = 8;
     private static final int PASSWORD_MAX_LENGTH = 64;
 
     private TextInputLayout phoneLayout;
@@ -173,7 +172,7 @@ public class RegisterActivity extends AppCompatActivity {
                 if (result.isSuccess()) {
                     SessionStore.get().save(result.getData());
                     Toast.makeText(this, R.string.register_success, Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(this, SessionActivity.class);
+                    Intent intent = new Intent(this, HomeActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     this.startActivity(intent);
                     this.finish();
@@ -196,7 +195,7 @@ public class RegisterActivity extends AppCompatActivity {
             return false;
         }
         String password = this.text(this.passwordInput);
-        if (password.length() < PASSWORD_MIN_LENGTH || password.length() > PASSWORD_MAX_LENGTH) {
+        if (password.isEmpty() || password.length() > PASSWORD_MAX_LENGTH) {
             this.passwordLayout.setError(this.getString(R.string.register_password_invalid));
             return false;
         }
