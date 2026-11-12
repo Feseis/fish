@@ -32,3 +32,8 @@ logistics:
     key: ${AMAP_WEB_KEY}
   auth:
     base-url: ${AUTH_SERVICE_URL}
+  payment:
+    base-url: ${PAYMENT_SERVICE_URL}
+  routing:
+    # 启动时是否跑路由配置校验；数据量大或频繁启动时置 false
+    validate-on-startup: true

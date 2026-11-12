@@ -4,13 +4,14 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import lombok.RequiredArgsConstructor;
-import me.feseis.fish.logistics.dto.price.PriceQuoteRequest;
-import me.feseis.fish.logistics.dto.price.PriceQuoteResponse;
+import me.feseis.fish.logistics.vo.price.PriceQuoteReqVO;
+import me.feseis.fish.logistics.vo.price.PriceQuoteRespVO;
 import me.feseis.fish.logistics.exp.BizException;
 import me.feseis.fish.logistics.exp.ErrorCode;
 import me.feseis.fish.logistics.mapper.PricingMapper;
 import me.feseis.fish.logistics.mapper.model.InsuranceRuleRow;
 import me.feseis.fish.logistics.mapper.model.PriceRuleRow;
+import me.feseis.fish.logistics.support.FreightRelationResolver;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,7 +25,7 @@ public class PriceQuoteService {
 
     private final PricingMapper pricingMapper;
 
-    public PriceQuoteResponse quote(PriceQuoteRequest req) {
+    public PriceQuoteRespVO quote(PriceQuoteReqVO req) {
         int relationId = FreightRelationResolver.resolve(req.senderAdcode(), req.receiverAdcode());
 
         PriceRuleRow priceRule = pricingMapper.findEnabledPriceRule(relationId)
@@ -52,7 +53,7 @@ public class PriceQuoteService {
 
         BigDecimal total = freight.add(insuredFee).setScale(2, RoundingMode.HALF_UP);
 
-        return new PriceQuoteResponse(
+        return new PriceQuoteRespVO(
                 relationId,
                 priceRule.getPriceRuleId(),
                 insuranceRuleId,

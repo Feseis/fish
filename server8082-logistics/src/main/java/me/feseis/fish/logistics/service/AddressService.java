@@ -6,9 +6,12 @@ import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import me.feseis.fish.logistics.client.AmapClient;
-import me.feseis.fish.logistics.dto.address.RegeoResponse;
-import me.feseis.fish.logistics.dto.address.UserAddressResponse;
-import me.feseis.fish.logistics.dto.address.UserAddressSaveRequest;
+import me.feseis.fish.logistics.client.model.amap.AmapPoi;
+import me.feseis.fish.logistics.client.model.amap.AmapRegeoResult;
+import me.feseis.fish.logistics.vo.address.PoiVO;
+import me.feseis.fish.logistics.vo.address.RegeoRespVO;
+import me.feseis.fish.logistics.vo.address.UserAddressRespVO;
+import me.feseis.fish.logistics.vo.address.UserAddressSaveReqVO;
 import me.feseis.fish.logistics.exp.BizException;
 import me.feseis.fish.logistics.exp.ErrorCode;
 import me.feseis.fish.logistics.mapper.GeoAddressMapper;
@@ -35,21 +38,46 @@ public class AddressService {
     private final GeoAddressMapper geoAddressMapper;
     private final UserAddressMapper userAddressMapper;
 
-    public RegeoResponse regeo(BigDecimal lng, BigDecimal lat) {
+    public RegeoRespVO regeo(BigDecimal lng, BigDecimal lat) {
         if (lng == null || lat == null
                 || lng.compareTo(LNG_MIN) < 0 || lng.compareTo(LNG_MAX) > 0
                 || lat.compareTo(LAT_MIN) < 0 || lat.compareTo(LAT_MAX) > 0) {
             throw BizException.of(ErrorCode.INVALID_PARAM, "坐标超出中国范围");
         }
-        return amapClient.regeo(lng, lat);
+        return toRegeoResp(amapClient.regeo(lng, lat));
     }
 
-    public List<UserAddressResponse> list(String accountId) {
+    private static RegeoRespVO toRegeoResp(AmapRegeoResult result) {
+        List<PoiVO> pois = result.pois().stream()
+                .map(AddressService::toVO)
+                .toList();
+        return new RegeoRespVO(result.formattedAddress(), result.province(), result.city(),
+                result.district(), result.adcode(), pois);
+    }
+
+    /** 关键字搜索 POI；city 非空时限定城市。 */
+    public List<PoiVO> search(String keyword, String city) {
+        String trimmed = keyword == null ? "" : keyword.trim();
+        if (trimmed.isEmpty() || trimmed.length() > 32) {
+            throw BizException.of(ErrorCode.INVALID_PARAM, "关键字不能为空且不超过 32 字");
+        }
+        String cityName = city == null || city.isBlank() ? null : city.trim();
+        return amapClient.searchPlaces(trimmed, cityName).stream()
+                .map(AddressService::toVO)
+                .toList();
+    }
+
+    private static PoiVO toVO(AmapPoi poi) {
+        return new PoiVO(poi.poiId(), poi.poiName(), poi.adcode(), poi.province(),
+                poi.city(), poi.district(), poi.address(), poi.lng(), poi.lat());
+    }
+
+    public List<UserAddressRespVO> list(String accountId) {
         return userAddressMapper.listByAccount(accountId).stream().map(AddressService::toResponse).toList();
     }
 
     @Transactional
-    public UserAddressResponse create(String accountId, UserAddressSaveRequest req) {
+    public UserAddressRespVO create(String accountId, UserAddressSaveReqVO req) {
         String geoAddressId = upsertGeoAddress(req);
 
         var existing = userAddressMapper.findNatural(accountId, geoAddressId,
@@ -75,7 +103,7 @@ public class AddressService {
     }
 
     @Transactional
-    public UserAddressResponse update(String accountId, String userAddressId, UserAddressSaveRequest req) {
+    public UserAddressRespVO update(String accountId, String userAddressId, UserAddressSaveReqVO req) {
         String geoAddressId = upsertGeoAddress(req);
         var current = userAddressMapper.findOwned(userAddressId, accountId)
                 .filter(row -> row.getDeletedAt() == null)
@@ -103,7 +131,7 @@ public class AddressService {
     }
 
     /** 按 poi_id 命中缓存就复用并刷新字段，未命中才插入，缓存永不物理删除。 */
-    private String upsertGeoAddress(UserAddressSaveRequest req) {
+    private String upsertGeoAddress(UserAddressSaveReqVO req) {
         String city = req.city() == null || req.city().isBlank() ? req.province() : req.city();
         var cached = geoAddressMapper.findByPoiId(req.poiId());
         if (cached.isPresent()) {
@@ -126,14 +154,14 @@ public class AddressService {
         return geoAddressId;
     }
 
-    private UserAddressResponse loadOwned(String userAddressId, String accountId) {
+    private UserAddressRespVO loadOwned(String userAddressId, String accountId) {
         UserAddressRow row = userAddressMapper.findOwned(userAddressId, accountId)
                 .orElseThrow(() -> BizException.of(ErrorCode.ADDRESS_NOT_FOUND));
         return toResponse(row);
     }
 
-    private static UserAddressResponse toResponse(UserAddressRow row) {
-        return new UserAddressResponse(
+    private static UserAddressRespVO toResponse(UserAddressRow row) {
+        return new UserAddressRespVO(
                 row.getUserAddressId(),
                 row.getPoiId(),
                 row.getPoiName(),

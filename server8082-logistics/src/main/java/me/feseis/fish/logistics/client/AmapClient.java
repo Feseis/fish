@@ -6,9 +6,9 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.feseis.fish.logistics.client.model.amap.AmapPoi;
+import me.feseis.fish.logistics.client.model.amap.AmapRegeoResult;
 import me.feseis.fish.logistics.config.properties.LogisticsProperties;
-import me.feseis.fish.logistics.dto.address.PoiItem;
-import me.feseis.fish.logistics.dto.address.RegeoResponse;
 import me.feseis.fish.logistics.exp.BizException;
 import me.feseis.fish.logistics.exp.ErrorCode;
 import org.springframework.stereotype.Component;
@@ -25,11 +25,12 @@ import tools.jackson.databind.JsonNode;
 public class AmapClient {
 
     private static final int POI_RADIUS = 1000;
+    private static final int POI_PAGE_SIZE = 20;
 
     private final RestClient amapRestClient;
     private final LogisticsProperties props;
 
-    public RegeoResponse regeo(BigDecimal lng, BigDecimal lat) {
+    public AmapRegeoResult regeo(BigDecimal lng, BigDecimal lat) {
         JsonNode root;
         try {
             root = amapRestClient.get()
@@ -67,7 +68,7 @@ public class AmapClient {
         }
         String district = text(component, "district");
 
-        return new RegeoResponse(
+        return new AmapRegeoResult(
                 text(regeocode, "formatted_address"),
                 province,
                 city,
@@ -77,11 +78,77 @@ public class AmapClient {
     }
 
     /**
+     * 关键字搜索，返回候选 POI；city 非空时用 citylimit=true 限定城市。
+     */
+    public List<AmapPoi> searchPlaces(String keyword, String city) {
+        JsonNode root;
+        try {
+            root = amapRestClient.get()
+                    .uri(uriBuilder -> {
+                        var builder = uriBuilder.path("/v3/place/text")
+                                .queryParam("key", props.amap().key())
+                                .queryParam("keywords", keyword)
+                                .queryParam("offset", POI_PAGE_SIZE)
+                                .queryParam("page", 1)
+                                .queryParam("extensions", "base");
+                        if (city != null && !city.isBlank()) {
+                            builder.queryParam("city", city).queryParam("citylimit", "true");
+                        }
+                        return builder.build();
+                    })
+                    .retrieve()
+                    .body(JsonNode.class);
+        } catch (RestClientException e) {
+            log.warn("高德 place/text 调用失败: {}", e.getMessage());
+            throw BizException.of(ErrorCode.AMAP_UNAVAILABLE);
+        }
+
+        if (root == null || !"1".equals(root.path("status").asText())) {
+            log.warn("高德 place/text 返回失败 infocode={}", root == null ? null : root.path("infocode").asText());
+            throw BizException.of(ErrorCode.AMAP_UNAVAILABLE);
+        }
+
+        List<AmapPoi> items = new ArrayList<>();
+        JsonNode pois = root.path("pois");
+        if (pois == null || !pois.isArray()) {
+            return items;
+        }
+        for (JsonNode poi : pois) {
+            String poiId = text(poi, "id");
+            String location = text(poi, "location");
+            String adcode = text(poi, "adcode");
+            if (poiId == null || location == null || adcode == null) {
+                continue;
+            }
+            String[] parts = location.split(",");
+            if (parts.length != 2) {
+                continue;
+            }
+            String province = text(poi, "pname");
+            String cityName = text(poi, "cityname");
+            if (cityName == null) {
+                cityName = province;
+            }
+            items.add(new AmapPoi(
+                    poiId,
+                    text(poi, "name"),
+                    adcode,
+                    province,
+                    cityName,
+                    text(poi, "adname"),
+                    text(poi, "address"),
+                    new BigDecimal(parts[0]),
+                    new BigDecimal(parts[1])));
+        }
+        return items;
+    }
+
+    /**
      * POI 只带 id/name/location/address，不带行政区划；行政区划一律取定位点的 addressComponent。
      * 这与业务语义一致：用户选的是自己位置附近的锚点，归属行政区由自己的定位决定。
      */
-    private List<PoiItem> parsePois(JsonNode pois, String province, String city, String district, String adcode) {
-        List<PoiItem> items = new ArrayList<>();
+    private List<AmapPoi> parsePois(JsonNode pois, String province, String city, String district, String adcode) {
+        List<AmapPoi> items = new ArrayList<>();
         if (pois == null || !pois.isArray()) {
             return items;
         }
@@ -95,7 +162,7 @@ public class AmapClient {
             if (parts.length != 2) {
                 continue;
             }
-            items.add(new PoiItem(
+            items.add(new AmapPoi(
                     poiId,
                     text(poi, "name"),
                     adcode,

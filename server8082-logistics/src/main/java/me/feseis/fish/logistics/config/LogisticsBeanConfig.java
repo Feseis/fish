@@ -32,4 +32,16 @@ public class LogisticsBeanConfig {
                 .requestFactory(factory)
                 .build();
     }
+
+    /** payment 服务客户端：下单即建寄付单，超时与 auth 一致。 */
+    @Bean
+    public RestClient paymentRestClient(LogisticsProperties props) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(1500);
+        factory.setReadTimeout(3000);
+        return RestClient.builder()
+                .baseUrl(props.payment().baseUrl())
+                .requestFactory(factory)
+                .build();
+    }
 }

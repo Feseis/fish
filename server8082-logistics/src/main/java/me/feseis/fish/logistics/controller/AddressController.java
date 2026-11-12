@@ -5,10 +5,11 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import me.feseis.fish.logistics.dto.address.RegeoResponse;
-import me.feseis.fish.logistics.dto.address.UserAddressResponse;
-import me.feseis.fish.logistics.dto.address.UserAddressSaveRequest;
-import me.feseis.fish.logistics.interceptor.AuthInterceptor;
+import me.feseis.fish.logistics.vo.address.PoiVO;
+import me.feseis.fish.logistics.vo.address.RegeoRespVO;
+import me.feseis.fish.logistics.vo.address.UserAddressRespVO;
+import me.feseis.fish.logistics.vo.address.UserAddressSaveReqVO;
+import me.feseis.fish.logistics.config.interceptor.AuthInterceptor;
 import me.feseis.fish.logistics.service.AddressService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,28 +35,34 @@ public class AddressController {
     private final AddressService addressService;
 
     @GetMapping("/regeo")
-    public RegeoResponse regeo(@RequestParam BigDecimal lng, @RequestParam BigDecimal lat) {
+    public RegeoRespVO regeo(@RequestParam BigDecimal lng, @RequestParam BigDecimal lat) {
         return addressService.regeo(lng, lat);
     }
 
+    @GetMapping("/search")
+    public List<PoiVO> search(@RequestParam String keyword,
+                              @RequestParam(required = false) String city) {
+        return addressService.search(keyword, city);
+    }
+
     @GetMapping("/user")
-    public List<UserAddressResponse> list(
+    public List<UserAddressRespVO> list(
             @RequestAttribute(AuthInterceptor.ATTR_ACCOUNT_ID) String accountId) {
         return addressService.list(accountId);
     }
 
     @PostMapping("/user")
-    public ResponseEntity<UserAddressResponse> create(
+    public ResponseEntity<UserAddressRespVO> create(
             @RequestAttribute(AuthInterceptor.ATTR_ACCOUNT_ID) String accountId,
-            @Valid @RequestBody UserAddressSaveRequest req) {
+            @Valid @RequestBody UserAddressSaveReqVO req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(addressService.create(accountId, req));
     }
 
     @PutMapping("/user/{userAddressId}")
-    public UserAddressResponse update(
+    public UserAddressRespVO update(
             @RequestAttribute(AuthInterceptor.ATTR_ACCOUNT_ID) String accountId,
             @PathVariable String userAddressId,
-            @Valid @RequestBody UserAddressSaveRequest req) {
+            @Valid @RequestBody UserAddressSaveReqVO req) {
         return addressService.update(accountId, userAddressId, req);
     }
 

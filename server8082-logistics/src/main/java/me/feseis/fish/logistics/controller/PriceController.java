@@ -2,8 +2,8 @@ package me.feseis.fish.logistics.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import me.feseis.fish.logistics.dto.price.PriceQuoteRequest;
-import me.feseis.fish.logistics.dto.price.PriceQuoteResponse;
+import me.feseis.fish.logistics.vo.price.PriceQuoteReqVO;
+import me.feseis.fish.logistics.vo.price.PriceQuoteRespVO;
 import me.feseis.fish.logistics.service.PriceQuoteService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +21,7 @@ public class PriceController {
     private final PriceQuoteService priceQuoteService;
 
     @PostMapping("/quote")
-    public PriceQuoteResponse quote(@Valid @RequestBody PriceQuoteRequest req) {
+    public PriceQuoteRespVO quote(@Valid @RequestBody PriceQuoteReqVO req) {
         return priceQuoteService.quote(req);
     }
 }

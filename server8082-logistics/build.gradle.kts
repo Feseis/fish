@@ -11,6 +11,8 @@ java {
 
 dependencies {
     implementation(project(":contract"))
+    implementation(project(":auth-api"))
+    implementation(project(":payment-api"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
