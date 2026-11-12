@@ -1,4 +1,6 @@
-package com.feseis.fish;
+package com.feseis.fish.ui.main;
+
+import com.feseis.fish.R;
 
 import android.os.Bundle;
 
@@ -10,6 +12,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
+import com.feseis.fish.ui.home.HomeFragment;
+import com.feseis.fish.ui.orders.OrdersFragment;
+import com.feseis.fish.ui.profile.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 /**

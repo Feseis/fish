@@ -1,4 +1,4 @@
-package com.feseis.fish.auth.model;
+package com.feseis.fish.core.model;
 
 /**
  * 客户端统一错误。code 与后端 ErrorCode 的名称保持一致。

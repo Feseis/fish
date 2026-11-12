@@ -1,4 +1,6 @@
-package com.feseis.fish;
+package com.feseis.fish.ui.auth;
+
+import com.feseis.fish.R;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,7 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.feseis.fish.auth.api.AuthApi;
 import com.feseis.fish.auth.api.AuthApiProvider;
-import com.feseis.fish.auth.model.AuthError;
+import com.feseis.fish.core.model.AuthError;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;

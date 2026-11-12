@@ -1,4 +1,6 @@
-package com.feseis.fish;
+package com.feseis.fish.ui.home;
+
+import com.feseis.fish.R;
 
 import android.Manifest;
 import android.app.Activity;
@@ -31,6 +33,9 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.MyLocationStyle;
 import com.feseis.fish.logistics.model.UserAddress;
 import com.feseis.fish.logistics.store.ShipmentDraftStore;
+import com.feseis.fish.ui.address.AddressBookActivity;
+import com.feseis.fish.ui.address.AddressEntryActivity;
+import com.feseis.fish.ui.order.OrderCreateActivity;
 
 /**
  * 首页：顶部地图 + 寄收地址选择。

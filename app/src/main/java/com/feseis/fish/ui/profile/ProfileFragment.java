@@ -1,4 +1,6 @@
-package com.feseis.fish;
+package com.feseis.fish.ui.profile;
+
+import com.feseis.fish.R;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +15,8 @@ import androidx.fragment.app.Fragment;
 
 import com.feseis.fish.auth.model.LoginResult;
 import com.feseis.fish.auth.store.SessionStore;
+import com.feseis.fish.ui.address.AddressBookActivity;
+import com.feseis.fish.ui.staff.StaffApplyActivity;
 
 /**
  * 我的：头像、姓名占位、脱敏手机号、三个入口。

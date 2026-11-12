@@ -1,4 +1,6 @@
-package com.feseis.fish;
+package com.feseis.fish.ui.address;
+
+import com.feseis.fish.R;
 
 import android.view.LayoutInflater;
 import android.view.View;

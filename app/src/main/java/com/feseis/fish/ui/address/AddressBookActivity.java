@@ -1,4 +1,6 @@
-package com.feseis.fish;
+package com.feseis.fish.ui.address;
+
+import com.feseis.fish.R;
 
 import android.content.Context;
 import android.content.Intent;
@@ -18,7 +20,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.feseis.fish.auth.model.AuthError;
+import com.feseis.fish.core.model.AuthError;
 import com.feseis.fish.auth.model.LoginResult;
 import com.feseis.fish.auth.store.SessionStore;
 import com.feseis.fish.logistics.api.LogisticsApi;

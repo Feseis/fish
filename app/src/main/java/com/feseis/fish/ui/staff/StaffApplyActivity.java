@@ -1,4 +1,6 @@
-package com.feseis.fish;
+package com.feseis.fish.ui.staff;
+
+import com.feseis.fish.R;
 
 import android.os.Bundle;
 import android.view.View;
@@ -12,7 +14,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.feseis.fish.auth.model.AuthError;
+import com.feseis.fish.core.model.AuthError;
 import com.feseis.fish.auth.model.LoginResult;
 import com.feseis.fish.auth.store.SessionStore;
 import com.feseis.fish.logistics.api.LogisticsApiProvider;

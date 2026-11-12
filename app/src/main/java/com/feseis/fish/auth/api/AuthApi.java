@@ -1,6 +1,6 @@
 package com.feseis.fish.auth.api;
 
-import com.feseis.fish.auth.model.ApiCallback;
+import com.feseis.fish.core.api.ApiCallback;
 import com.feseis.fish.auth.model.HealthResult;
 import com.feseis.fish.auth.model.LoginResult;
 import com.feseis.fish.auth.model.RefreshResult;

@@ -1,4 +1,7 @@
-package com.feseis.fish;
+package com.feseis.fish.ui.launch;
+
+import com.feseis.fish.BuildConfig;
+import com.feseis.fish.R;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,10 +19,12 @@ import androidx.core.view.WindowInsetsCompat;
 import com.feseis.fish.auth.api.AuthApiProvider;
 import com.feseis.fish.auth.api.TokenRefresher;
 import com.feseis.fish.auth.config.AuthEndpoint;
-import com.feseis.fish.auth.model.AuthError;
+import com.feseis.fish.core.model.AuthError;
 import com.feseis.fish.auth.model.HealthResult;
 import com.feseis.fish.auth.store.PersistentSessionStore;
 import com.feseis.fish.auth.store.SessionStore;
+import com.feseis.fish.ui.auth.LoginActivity;
+import com.feseis.fish.ui.main.HomeActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;

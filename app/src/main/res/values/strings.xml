@@ -54,16 +54,6 @@
     <string name="dev_connect_ok">已连接：%1$s</string>
     <string name="dev_connect_degraded">服务可达，但数据库或 Redis 未就绪</string>
     <string name="dev_connect_network_fail">连接失败：%1$s</string>
-    <string name="session_title">会话信息</string>
-    <string name="session_subtitle">登录成功返回的全部基本信息</string>
-    <string name="session_account">账号 ID</string>
-    <string name="session_phone">手机号</string>
-    <string name="session_roles">角色</string>
-    <string name="session_token">短期令牌</string>
-    <string name="session_expire">过期时间</string>
-    <string name="session_back_home">返回首页</string>
-    <string name="session_logout">退出登录</string>
-    <string name="session_empty">—</string>
     <string name="main_not_logged_in">未登录</string>
     <string name="main_logged_in">已登录</string>
     <string name="main_account_format">账号：%1$s</string>

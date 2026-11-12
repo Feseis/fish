@@ -1,4 +1,6 @@
-package com.feseis.fish;
+package com.feseis.fish.ui.orders;
+
+import com.feseis.fish.R;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

@@ -1,4 +1,6 @@
-package com.feseis.fish.auth.model;
+package com.feseis.fish.core.api;
+
+import com.feseis.fish.core.model.AuthError;
 
 /**
  * 统一结果：成功带 data，失败带 error，二者互斥。

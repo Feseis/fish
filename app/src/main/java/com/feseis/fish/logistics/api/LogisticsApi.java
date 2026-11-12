@@ -1,6 +1,6 @@
 package com.feseis.fish.logistics.api;
 
-import com.feseis.fish.auth.model.ApiCallback;
+import com.feseis.fish.core.api.ApiCallback;
 import com.feseis.fish.logistics.model.AddressDraft;
 import com.feseis.fish.logistics.model.Poi;
 import com.feseis.fish.logistics.model.PriceQuote;

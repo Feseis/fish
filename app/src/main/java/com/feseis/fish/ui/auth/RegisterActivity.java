@@ -1,4 +1,6 @@
-package com.feseis.fish;
+package com.feseis.fish.ui.auth;
+
+import com.feseis.fish.R;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,10 +19,11 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.feseis.fish.auth.api.AuthApi;
 import com.feseis.fish.auth.api.AuthApiProvider;
-import com.feseis.fish.auth.model.ApiCallback;
-import com.feseis.fish.auth.model.AuthError;
+import com.feseis.fish.core.api.ApiCallback;
+import com.feseis.fish.core.model.AuthError;
 import com.feseis.fish.auth.model.LoginResult;
 import com.feseis.fish.auth.store.SessionStore;
+import com.feseis.fish.ui.main.HomeActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;

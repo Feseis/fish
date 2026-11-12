@@ -3,9 +3,9 @@ package com.feseis.fish.auth.api;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.feseis.fish.auth.model.ApiCallback;
-import com.feseis.fish.auth.model.ApiResult;
-import com.feseis.fish.auth.model.AuthError;
+import com.feseis.fish.core.api.ApiCallback;
+import com.feseis.fish.core.api.ApiResult;
+import com.feseis.fish.core.model.AuthError;
 import com.feseis.fish.auth.model.HealthResult;
 import com.feseis.fish.auth.model.LoginResult;
 import com.feseis.fish.auth.model.RefreshResult;
