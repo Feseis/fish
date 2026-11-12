@@ -3,6 +3,7 @@ package com.feseis.fish.logistics.api;
 import com.feseis.fish.auth.model.ApiCallback;
 import com.feseis.fish.logistics.model.AddressDraft;
 import com.feseis.fish.logistics.model.Poi;
+import com.feseis.fish.logistics.model.PriceQuote;
 import com.feseis.fish.logistics.model.RegeoResult;
 import com.feseis.fish.logistics.model.StaffApplyResult;
 import com.feseis.fish.logistics.model.UserAddress;
@@ -29,4 +30,8 @@ public interface LogisticsApi {
     void regeo(double lng, double lat, ApiCallback<RegeoResult> callback);
 
     void searchAddressPois(String keyword, String city, ApiCallback<List<Poi>> callback);
+
+    /** 运费试算。declaredValue 传 0 表示不保价。 */
+    void quote(String senderAdcode, String receiverAdcode, double itemWeight,
+               double declaredValue, ApiCallback<PriceQuote> callback);
 }

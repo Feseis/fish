@@ -71,6 +71,8 @@
     <string name="main_expire_format">登录凭证过期：%1$s</string>
     <string name="main_logout">退出登录</string>
     <string name="main_logout_success">已退出登录</string>
+    <string name="main_restoring">正在恢复登录…</string>
+    <string name="main_restore_failed">登录状态已失效，请重新登录</string>
 
     <string name="nav_home">首页</string>
     <string name="nav_orders">订单</string>
@@ -139,7 +141,25 @@
     <string name="address_entry_confirming">保存中…</string>
     <string name="address_entry_saved_to_book">已保存到地址簿</string>
     <string name="order_create_title">填写寄件信息</string>
-    <string name="order_create_placeholder">寄件信息填写将在下一步实现</string>
+    <string name="order_create_sender">寄件</string>
+    <string name="order_create_receiver">收件</string>
+    <string name="order_create_item_name_hint">物品名称</string>
+    <string name="order_create_weight_hint">重量（kg）</string>
+    <string name="order_create_declared_hint">申报价值（元，选填）</string>
+    <string name="order_create_remark_hint">备注（选填）</string>
+    <string name="order_create_freight">运费</string>
+    <string name="order_create_insured_fee">保价费</string>
+    <string name="order_create_total">合计</string>
+    <string name="order_create_quote">试算运费</string>
+    <string name="order_create_quoting">试算中…</string>
+    <string name="order_create_error_address">寄收地址信息不完整，请返回首页重新选择</string>
+    <string name="order_create_error_weight">请填写有效重量，最多 3 位小数</string>
+    <string name="order_create_error_declared">申报价值格式不正确，最多 2 位小数</string>
+    <string name="order_create_error_price_rule">该寄收线路暂无运费规则</string>
+    <string name="order_create_error_insurance_rule">保价规则未配置</string>
+    <string name="order_create_error_insurance_limit">申报价值超过保价上限</string>
+    <string name="order_create_error_unauthorized">登录已过期，请重新登录</string>
+    <string name="order_create_error_generic">试算失败：%1$s</string>
 
     <string name="orders_empty">订单功能开发中</string>
 

@@ -12,6 +12,7 @@ import com.feseis.fish.auth.model.HealthResult;
 import com.feseis.fish.auth.model.LoginResult;
 import com.feseis.fish.auth.model.RefreshResult;
 import com.feseis.fish.auth.model.VerifyResult;
+import com.feseis.fish.auth.store.PersistentSessionStore;
 import com.feseis.fish.auth.store.SessionStore;
 import me.feseis.fish.contract.AuthHeaders;
 
@@ -31,6 +32,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -111,8 +113,14 @@ public final class HttpAuthApi implements AuthApi {
 
     @Override
     public void logout(ApiCallback<Void> callback) {
-        this.call("POST", "/auth/logout", null, true, false,
-                json -> (Void) null, callback);
+        this.call("POST", "/auth/logout", null, true, false, json -> (Void) null,
+                result -> {
+                    if (result.isSuccess()) {
+                        SessionStore.get().clear();
+                        PersistentSessionStore.clear();
+                    }
+                    callback.onResult(result);
+                });
     }
 
     @Override
@@ -151,36 +159,20 @@ public final class HttpAuthApi implements AuthApi {
             return;
         }
         this.executor.execute(() -> {
-            HttpURLConnection connection = null;
             try {
-                connection = (HttpURLConnection) new URL(base + path).openConnection();
-                connection.setRequestMethod(method);
-                connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
-                connection.setReadTimeout(READ_TIMEOUT_MS);
-                connection.setRequestProperty("Accept", "application/json");
-                if (payload != null) {
-                    connection.setDoOutput(true);
-                    connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-                    try (OutputStream out = connection.getOutputStream()) {
-                        out.write(payload.toString().getBytes(StandardCharsets.UTF_8));
-                    }
+                Response response = this.execute(method, base + path, payload, authorized);
+                if (response.status == 401 && authorized && !"/auth/refresh".equals(path)
+                        && TokenRefresher.refreshNow()) {
+                    response = this.execute(method, base + path, payload, authorized);
                 }
-                if (authorized) {
-                    LoginResult session = SessionStore.get().getSession();
-                    if (session != null && session.getAccessToken() != null) {
-                        connection.setRequestProperty(AuthHeaders.AUTHORIZATION,
-                                AuthHeaders.BEARER_PREFIX + session.getAccessToken());
-                    }
-                }
-                int status = connection.getResponseCode();
-                String text = readAll(status >= 400
-                        ? connection.getErrorStream() : connection.getInputStream());
-                if (status >= 200 && status < 300) {
-                    this.deliver(ApiResult.success(parser.parse(parseJson(text))), callback);
+                if (response.status >= 200 && response.status < 300) {
+                    T parsed = parser.parse(parseJson(response.text));
+                    rememberRefreshToken(response.headers, parsed);
+                    this.deliver(ApiResult.success(parsed), callback);
                 } else if (parseErrorBody) {
-                    this.deliver(ApiResult.success(parser.parse(parseJson(text))), callback);
+                    this.deliver(ApiResult.success(parser.parse(parseJson(response.text))), callback);
                 } else {
-                    this.deliver(ApiResult.failure(toError(status, text)), callback);
+                    this.deliver(ApiResult.failure(toError(response.status, response.text)), callback);
                 }
             } catch (JSONException e) {
                 this.deliver(ApiResult.<T>failure(
@@ -188,12 +180,90 @@ public final class HttpAuthApi implements AuthApi {
             } catch (Exception e) {
                 String reason = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
                 this.deliver(ApiResult.<T>failure(new AuthError(AuthError.NETWORK, reason)), callback);
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
             }
         });
+    }
+
+    /** 执行单次请求，连接在返回前关闭。 */
+    private Response execute(String method, String url, JSONObject payload,
+                             boolean authorized) throws IOException {
+        HttpURLConnection connection = null;
+        try {
+            connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod(method);
+            connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+            connection.setReadTimeout(READ_TIMEOUT_MS);
+            connection.setRequestProperty("Accept", "application/json");
+            if (payload != null) {
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                try (OutputStream out = connection.getOutputStream()) {
+                    out.write(payload.toString().getBytes(StandardCharsets.UTF_8));
+                }
+            }
+            if (authorized) {
+                LoginResult session = SessionStore.get().getSession();
+                if (session != null && session.getAccessToken() != null) {
+                    connection.setRequestProperty(AuthHeaders.AUTHORIZATION,
+                            AuthHeaders.BEARER_PREFIX + session.getAccessToken());
+                }
+            }
+            int status = connection.getResponseCode();
+            String text = readAll(status >= 400
+                    ? connection.getErrorStream() : connection.getInputStream());
+            return new Response(status, text, connection.getHeaderFields());
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    /** 登录与注册成功时把 Set-Cookie 里的 refresh 令牌落盘，供冷启动恢复。 */
+    private static void rememberRefreshToken(Map<String, List<String>> headers, Object parsed) {
+        if (!(parsed instanceof LoginResult)) {
+            return;
+        }
+        String token = extractRefreshToken(headers);
+        if (token == null || token.isEmpty()) {
+            return;
+        }
+        LoginResult login = (LoginResult) parsed;
+        PersistentSessionStore.save(login.getAccountId(), login.getPhone(),
+                login.getRoles(), token);
+    }
+
+    private static String extractRefreshToken(Map<String, List<String>> headers) {
+        if (headers == null) {
+            return null;
+        }
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+            if (entry.getKey() == null || !"Set-Cookie".equalsIgnoreCase(entry.getKey())) {
+                continue;
+            }
+            for (String value : entry.getValue()) {
+                if (value == null || !value.startsWith("refresh_token=")) {
+                    continue;
+                }
+                int end = value.indexOf(';');
+                return end < 0
+                        ? value.substring("refresh_token=".length())
+                        : value.substring("refresh_token=".length(), end);
+            }
+        }
+        return null;
+    }
+
+    private static final class Response {
+        private final int status;
+        private final String text;
+        private final Map<String, List<String>> headers;
+
+        private Response(int status, String text, Map<String, List<String>> headers) {
+            this.status = status;
+            this.text = text;
+            this.headers = headers;
+        }
     }
 
     private <T> void deliver(ApiResult<T> result, ApiCallback<T> callback) {

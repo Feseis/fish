@@ -14,9 +14,11 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.feseis.fish.auth.api.AuthApiProvider;
+import com.feseis.fish.auth.api.TokenRefresher;
 import com.feseis.fish.auth.config.AuthEndpoint;
 import com.feseis.fish.auth.model.AuthError;
 import com.feseis.fish.auth.model.HealthResult;
+import com.feseis.fish.auth.store.PersistentSessionStore;
 import com.feseis.fish.auth.store.SessionStore;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private TextInputEditText endpointInput;
     private MaterialButton testEndpointButton;
     private TextView endpointStatus;
+    private boolean restoring;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         this.logoutButton.setOnClickListener(v -> this.logout());
         this.setupDevPanel();
         this.refreshUi();
+        this.tryRestoreSession();
     }
 
     @Override
@@ -70,9 +74,40 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshUi() {
+        if (this.restoring) {
+            this.goLoginButton.setVisibility(View.VISIBLE);
+            this.goLoginButton.setEnabled(false);
+            this.goLoginButton.setText(R.string.main_restoring);
+            this.logoutButton.setVisibility(View.GONE);
+            return;
+        }
         boolean loggedIn = SessionStore.get().isLoggedIn();
+        this.goLoginButton.setEnabled(true);
+        this.goLoginButton.setText(R.string.launch_go_login);
         this.goLoginButton.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
         this.logoutButton.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+    }
+
+    /** 冷启动：有持久化 refresh 时静默换新 access，成功后直接进首页。 */
+    private void tryRestoreSession() {
+        if (SessionStore.get().isLoggedIn() || !PersistentSessionStore.hasSession()) {
+            return;
+        }
+        this.restoring = true;
+        this.refreshUi();
+        TokenRefresher.refreshAsync(success -> {
+            if (this.isFinishing() || this.isDestroyed()) {
+                return;
+            }
+            this.restoring = false;
+            if (!success) {
+                this.refreshUi();
+                Toast.makeText(this, R.string.main_restore_failed, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            this.startActivity(new Intent(this, HomeActivity.class));
+            this.finish();
+        });
     }
 
     private void logout() {
@@ -83,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
             }
             this.logoutButton.setEnabled(true);
             SessionStore.get().clear();
+            PersistentSessionStore.clear();
             this.refreshUi();
             Toast.makeText(this, R.string.main_logout_success, Toast.LENGTH_SHORT).show();
         });

@@ -5,6 +5,8 @@ import android.app.Application;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.maps.MapsInitializer;
 import com.feseis.fish.auth.api.AuthApiProvider;
+import com.feseis.fish.auth.api.TokenRefresher;
+import com.feseis.fish.auth.store.PersistentSessionStore;
 
 public class FishApp extends Application {
 
@@ -17,5 +19,7 @@ public class FishApp extends Application {
         AMapLocationClient.updatePrivacyShow(this, true, true);
         AMapLocationClient.updatePrivacyAgree(this, true);
         AuthApiProvider.init(this);
+        PersistentSessionStore.init(this);
+        TokenRefresher.init(this);
     }
 }

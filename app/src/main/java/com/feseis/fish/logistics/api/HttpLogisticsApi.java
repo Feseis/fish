@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.feseis.fish.auth.api.TokenRefresher;
 import com.feseis.fish.auth.config.AuthEndpoint;
 import com.feseis.fish.auth.model.ApiCallback;
 import com.feseis.fish.auth.model.ApiResult;
@@ -12,6 +13,7 @@ import com.feseis.fish.auth.model.LoginResult;
 import com.feseis.fish.auth.store.SessionStore;
 import com.feseis.fish.logistics.model.AddressDraft;
 import com.feseis.fish.logistics.model.Poi;
+import com.feseis.fish.logistics.model.PriceQuote;
 import com.feseis.fish.logistics.model.RegeoResult;
 import com.feseis.fish.logistics.model.StaffApplyResult;
 import com.feseis.fish.logistics.model.UserAddress;
@@ -129,7 +131,28 @@ public final class HttpLogisticsApi implements LogisticsApi {
         }, callback);
     }
 
-    /** 统一请求：GET/DELETE 无请求体，POST/PUT 传 JSON 对象。 */
+    @Override
+    public void quote(String senderAdcode, String receiverAdcode, double itemWeight,
+                      double declaredValue, ApiCallback<PriceQuote> callback) {
+        JSONObject body = new JSONObject();
+        put(body, "senderAdcode", senderAdcode);
+        put(body, "receiverAdcode", receiverAdcode);
+        try {
+            body.put("itemWeight", itemWeight);
+            body.put("declaredValue", declaredValue);
+        } catch (JSONException ignored) {
+            // 常量键，不会触发
+        }
+        send("POST", "/logistics/price/quote", body, text -> {
+            JSONObject json = new JSONObject(text);
+            return new PriceQuote(
+                    json.optDouble("freightAmount", 0),
+                    json.optDouble("insuredFee", 0),
+                    json.optDouble("totalAmount", 0));
+        }, callback);
+    }
+
+    /** 统一请求：GET/DELETE 无请求体，POST/PUT 传 JSON 对象；401 时自动续期并重放一次。 */
     private <T> void send(String method, String path, JSONObject body,
                           BodyParser<T> parser, ApiCallback<T> callback) {
         String host = AuthEndpoint.host(this.context);
@@ -141,36 +164,17 @@ public final class HttpLogisticsApi implements LogisticsApi {
         String base = "http://" + host + ":" + LOGISTICS_PORT;
 
         this.executor.execute(() -> {
-            HttpURLConnection connection = null;
             try {
-                connection = (HttpURLConnection) new URL(base + path).openConnection();
-                connection.setRequestMethod(method);
-                connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
-                connection.setReadTimeout(READ_TIMEOUT_MS);
-                connection.setRequestProperty("Accept", "application/json");
-
-                LoginResult session = SessionStore.get().getSession();
-                if (session != null && session.getAccessToken() != null) {
-                    connection.setRequestProperty(AuthHeaders.AUTHORIZATION,
-                            AuthHeaders.BEARER_PREFIX + session.getAccessToken());
+                Response response = this.execute(method, base + path, body);
+                if (response.status == 401 && SessionStore.get().isLoggedIn()
+                        && TokenRefresher.refreshNow()) {
+                    response = this.execute(method, base + path, body);
                 }
-
-                if (body != null) {
-                    connection.setDoOutput(true);
-                    connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-                    try (OutputStream out = connection.getOutputStream()) {
-                        out.write(body.toString().getBytes(StandardCharsets.UTF_8));
-                    }
-                }
-
-                int status = connection.getResponseCode();
-                String text = readAll(status >= 400
-                        ? connection.getErrorStream() : connection.getInputStream());
-
-                if (status >= 200 && status < 300) {
-                    this.deliver(ApiResult.success(parser.parse(text)), callback);
+                if (response.status >= 200 && response.status < 300) {
+                    this.deliver(ApiResult.success(parser.parse(response.text)), callback);
                 } else {
-                    this.deliver(ApiResult.<T>failure(toError(status, text)), callback);
+                    this.deliver(ApiResult.<T>failure(
+                            toError(response.status, response.text)), callback);
                 }
             } catch (JSONException e) {
                 this.deliver(ApiResult.<T>failure(
@@ -179,12 +183,53 @@ public final class HttpLogisticsApi implements LogisticsApi {
                 String reason = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
                 this.deliver(ApiResult.<T>failure(
                         new AuthError(AuthError.NETWORK, reason)), callback);
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
             }
         });
+    }
+
+    /** 执行单次请求，连接在返回前关闭。 */
+    private Response execute(String method, String url, JSONObject body) throws IOException {
+        HttpURLConnection connection = null;
+        try {
+            connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod(method);
+            connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+            connection.setReadTimeout(READ_TIMEOUT_MS);
+            connection.setRequestProperty("Accept", "application/json");
+
+            LoginResult session = SessionStore.get().getSession();
+            if (session != null && session.getAccessToken() != null) {
+                connection.setRequestProperty(AuthHeaders.AUTHORIZATION,
+                        AuthHeaders.BEARER_PREFIX + session.getAccessToken());
+            }
+
+            if (body != null) {
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                try (OutputStream out = connection.getOutputStream()) {
+                    out.write(body.toString().getBytes(StandardCharsets.UTF_8));
+                }
+            }
+
+            int status = connection.getResponseCode();
+            String text = readAll(status >= 400
+                    ? connection.getErrorStream() : connection.getInputStream());
+            return new Response(status, text);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    private static final class Response {
+        private final int status;
+        private final String text;
+
+        private Response(int status, String text) {
+            this.status = status;
+            this.text = text;
+        }
     }
 
     private <T> void deliver(ApiResult<T> result, ApiCallback<T> callback) {
