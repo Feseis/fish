@@ -21,3 +21,15 @@ spring:
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
+
+payment:
+  alipay:
+    # 沙箱开关。false 时 payChannel=2 直接返回「未接入」，模拟渠道不受影响
+    enabled: ${ALIPAY_ENABLED:false}
+    app-id: ${ALIPAY_APP_ID:}
+    gateway: ${ALIPAY_GATEWAY:https://openapi-sandbox.dl.alipaydev.com/gateway.do}
+    # 应用私钥（PKCS8）与支付宝公钥，两者不能混用
+    private-key: ${ALIPAY_PRIVATE_KEY:}
+    public-key: ${ALIPAY_PUBLIC_KEY:}
+    # 留空则不下发 notify_url，订单只靠主动查单入账
+    notify-url: ${ALIPAY_NOTIFY_URL:}
