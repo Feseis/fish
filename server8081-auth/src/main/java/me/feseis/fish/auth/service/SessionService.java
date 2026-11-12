@@ -9,9 +9,9 @@ import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import me.feseis.fish.auth.bo.login.LoginOutcome;
-import me.feseis.fish.auth.dto.login.LoginResponse;
-import me.feseis.fish.auth.dto.refresh.RefreshResponse;
-import me.feseis.fish.auth.dto.verify.VerifyResponse;
+import me.feseis.fish.auth.vo.login.LoginRespVO;
+import me.feseis.fish.auth.vo.refresh.RefreshRespVO;
+import me.feseis.fish.auth.vo.verify.VerifyRespVO;
 import me.feseis.fish.auth.config.properties.AuthProperties;
 import me.feseis.fish.auth.exp.AuthException;
 import me.feseis.fish.auth.exp.ErrorCode;
@@ -62,12 +62,12 @@ public class SessionService {
         loginLogMapper.insert(accountId, phone, RESULT_SUCCESS, null, sessionId, clientIp);
 
         OffsetDateTime accessExpiresAt = now.plus(accessTtl).atZone(ZONE).toOffsetDateTime();
-        LoginResponse body = new LoginResponse(accountId, mask(phone), roles, accessToken, accessExpiresAt);
+        LoginRespVO body = new LoginRespVO(accountId, mask(phone), roles, accessToken, accessExpiresAt);
         return new LoginOutcome(body, refreshToken, refreshTtl);
     }
 
     /** 续期：校验 refresh，签发新短期令牌，不轮换 refresh。 */
-    public RefreshResponse refresh(String refreshToken) {
+    public RefreshRespVO refresh(String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
             throw AuthException.of(ErrorCode.TOKEN_EXPIRED);
         }
@@ -103,15 +103,15 @@ public class SessionService {
                 new SessionView(session.getSessionId(), session.getAccountId(), pwdVersion), accessTtl);
         sessionMapper.touch(session.getSessionId(), now);
         OffsetDateTime accessExpiresAt = now.plus(accessTtl).atZone(ZONE).toOffsetDateTime();
-        return new RefreshResponse(accessToken, accessExpiresAt);
+        return new RefreshRespVO(accessToken, accessExpiresAt);
     }
 
     /** 校验短期令牌，供下游服务换取身份。只读 Redis 与角色表，不复核账号状态与密码版本。 */
-    public VerifyResponse verify(String accessToken) {
+    public VerifyRespVO verify(String accessToken) {
         SessionView view = tokenService.validate(accessToken)
                 .orElseThrow(() -> AuthException.of(ErrorCode.TOKEN_EXPIRED));
         List<Integer> roles = accountMapper.findRoleIds(view.accountId());
-        return new VerifyResponse(view.sessionId(), view.accountId(), roles);
+        return new VerifyRespVO(view.sessionId(), view.accountId(), roles);
     }
 
     /** 登出：结束会话并吊销本次携带的短期令牌，重复调用无副作用。 */

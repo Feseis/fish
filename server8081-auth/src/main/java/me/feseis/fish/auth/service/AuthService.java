@@ -5,8 +5,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.feseis.fish.auth.bo.login.LoginOutcome;
-import me.feseis.fish.auth.dto.login.LoginOnPasswordRequest;
-import me.feseis.fish.auth.dto.login.LoginOnPhoneOnlyRequest;
+import me.feseis.fish.auth.vo.login.LoginOnPasswordReqVO;
+import me.feseis.fish.auth.vo.login.LoginOnPhoneOnlyReqVO;
 import me.feseis.fish.auth.exp.AuthException;
 import me.feseis.fish.auth.exp.ErrorCode;
 import me.feseis.fish.auth.mapper.AccountMapper;
@@ -37,7 +37,7 @@ public class AuthService {
     private final SessionService sessionService;
     private final SmsCodeService smsCodeService;
 
-    public LoginOutcome login(LoginOnPasswordRequest req, String clientIp) {
+    public LoginOutcome login(LoginOnPasswordReqVO req, String clientIp) {
         AccountRow account;
         PasswordRow password;
         List<Integer> roles;
@@ -61,7 +61,7 @@ public class AuthService {
     }
 
     /** 验证码登录：先核销验证码，再查账号与状态。 */
-    public LoginOutcome loginBySms(LoginOnPhoneOnlyRequest req, String clientIp) {
+    public LoginOutcome loginBySms(LoginOnPhoneOnlyReqVO req, String clientIp) {
         try {
             smsCodeService.verify(req.phone(), req.code());
         } catch (AuthException e) {

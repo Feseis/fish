@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import me.feseis.fish.auth.bo.login.LoginOutcome;
-import me.feseis.fish.auth.dto.register.RegisterRequest;
+import me.feseis.fish.auth.vo.register.RegisterReqVO;
 import me.feseis.fish.auth.exp.AuthException;
 import me.feseis.fish.auth.exp.ErrorCode;
 import me.feseis.fish.auth.mapper.AccountMapper;
@@ -32,7 +32,7 @@ public class RegisterService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public LoginOutcome register(RegisterRequest req, String clientIp) {
+    public LoginOutcome register(RegisterReqVO req, String clientIp) {
         // 先验码再查重：避免未持码者用本接口探测手机号是否已注册
         smsCodeService.verify(req.phone(), req.code());
 

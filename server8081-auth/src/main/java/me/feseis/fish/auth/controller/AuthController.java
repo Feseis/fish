@@ -6,13 +6,13 @@ import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import me.feseis.fish.auth.bo.login.LoginOutcome;
 import me.feseis.fish.contract.AuthHeaders;
-import me.feseis.fish.auth.dto.login.LoginOnPasswordRequest;
-import me.feseis.fish.auth.dto.login.LoginOnPhoneOnlyRequest;
-import me.feseis.fish.auth.dto.login.LoginResponse;
-import me.feseis.fish.auth.dto.refresh.RefreshResponse;
-import me.feseis.fish.auth.dto.register.RegisterRequest;
-import me.feseis.fish.auth.dto.sms.SendSmsCodeRequest;
-import me.feseis.fish.auth.dto.verify.VerifyResponse;
+import me.feseis.fish.auth.vo.login.LoginOnPasswordReqVO;
+import me.feseis.fish.auth.vo.login.LoginOnPhoneOnlyReqVO;
+import me.feseis.fish.auth.vo.login.LoginRespVO;
+import me.feseis.fish.auth.vo.refresh.RefreshRespVO;
+import me.feseis.fish.auth.vo.register.RegisterReqVO;
+import me.feseis.fish.auth.vo.sms.SendSmsCodeReqVO;
+import me.feseis.fish.auth.vo.verify.VerifyRespVO;
 import me.feseis.fish.auth.config.properties.AuthProperties;
 import me.feseis.fish.auth.service.AuthService;
 import me.feseis.fish.auth.service.RegisterService;
@@ -44,13 +44,13 @@ public class AuthController {
     private final AuthProperties props;
 
     @PostMapping("/get-sms-code")
-    public ResponseEntity<Void> getSmsCode(@Valid @RequestBody SendSmsCodeRequest req) {
+    public ResponseEntity<Void> getSmsCode(@Valid @RequestBody SendSmsCodeReqVO req) {
         smsCodeService.sendCode(req.phone());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/register")
-    public ResponseEntity<LoginResponse> register(@Valid @RequestBody RegisterRequest req,
+    public ResponseEntity<LoginRespVO> register(@Valid @RequestBody RegisterReqVO req,
                                                   HttpServletRequest request) {
         LoginOutcome outcome = registerService.register(req, request.getRemoteAddr());
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -59,19 +59,19 @@ public class AuthController {
     }
 
     @PostMapping("/login/password")
-    public ResponseEntity<LoginResponse> loginByPassword(@Valid @RequestBody LoginOnPasswordRequest req,
+    public ResponseEntity<LoginRespVO> loginByPassword(@Valid @RequestBody LoginOnPasswordReqVO req,
                                                          HttpServletRequest request) {
         return loginResponse(authService.login(req, request.getRemoteAddr()));
     }
 
     @PostMapping("/login/sms")
-    public ResponseEntity<LoginResponse> loginBySms(@Valid @RequestBody LoginOnPhoneOnlyRequest req,
+    public ResponseEntity<LoginRespVO> loginBySms(@Valid @RequestBody LoginOnPhoneOnlyReqVO req,
                                                     HttpServletRequest request) {
         return loginResponse(authService.loginBySms(req, request.getRemoteAddr()));
     }
 
     @PostMapping("/refresh")
-    public RefreshResponse refresh(@CookieValue(name = "refresh_token", required = false) String refreshToken) {
+    public RefreshRespVO refresh(@CookieValue(name = "refresh_token", required = false) String refreshToken) {
         return sessionService.refresh(refreshToken);
     }
 
@@ -86,7 +86,7 @@ public class AuthController {
     }
 
     @PostMapping("/verify")
-    public VerifyResponse verify(@RequestHeader(value = AuthHeaders.AUTHORIZATION, required = false)
+    public VerifyRespVO verify(@RequestHeader(value = AuthHeaders.AUTHORIZATION, required = false)
                                  String authorization) {
         return sessionService.verify(bearer(authorization));
     }
@@ -98,7 +98,7 @@ public class AuthController {
         return authorization.substring(AuthHeaders.BEARER_PREFIX.length());
     }
 
-    private ResponseEntity<LoginResponse> loginResponse(LoginOutcome outcome) {
+    private ResponseEntity<LoginRespVO> loginResponse(LoginOutcome outcome) {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie(outcome).toString())
                 .body(outcome.response());

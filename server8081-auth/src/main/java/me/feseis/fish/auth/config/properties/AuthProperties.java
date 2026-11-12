@@ -25,16 +25,9 @@ public record AuthProperties(@Valid Token token, @Valid Cookie cookie, @Valid Sm
     }
 
     public record Sms(
-            @NotNull Duration codeTtl,
-            @NotNull Duration resendInterval,
-            @Valid @NotNull Pbox pbox
-    ) {
-    }
-
-    public record Pbox(
             @NotBlank String baseUrl,
-            @NotBlank String senderPhone,
-            @NotBlank String apiCode
+            @NotNull Duration codeTtl,
+            @NotNull Duration resendInterval
     ) {
     }
 }

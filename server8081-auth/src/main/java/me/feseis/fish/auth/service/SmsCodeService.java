@@ -3,10 +3,10 @@ package me.feseis.fish.auth.service;
 import java.security.SecureRandom;
 
 import lombok.RequiredArgsConstructor;
+import me.feseis.fish.auth.client.SmsClient;
 import me.feseis.fish.auth.config.properties.AuthProperties;
 import me.feseis.fish.auth.exp.AuthException;
 import me.feseis.fish.auth.exp.ErrorCode;
-import me.feseis.fish.auth.sender.SmsSender;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -28,11 +28,14 @@ public class SmsCodeService {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private final StringRedisTemplate redis;
-    private final SmsSender smsSender;
+    private final SmsClient smsClient;
     private final AuthProperties props;
 
-    /** 生成验证码并委托 SmsSender 发送；冷却期内重复请求直接拒绝。 */
+    /** 生成验证码并委托短信服务发送；先校验号码已在短信沙盒登记，冷却期内重复请求直接拒绝。 */
     public void sendCode(String phone) {
+        if (!smsClient.phoneExists(phone)) {
+            throw AuthException.of(ErrorCode.PHONE_UNREGISTERED);
+        }
         if (Boolean.TRUE.equals(redis.hasKey(CD_KEY + phone))) {
             throw AuthException.of(ErrorCode.RATE_LIMITED);
         }
@@ -40,7 +43,7 @@ public class SmsCodeService {
         redis.opsForValue().set(CODE_KEY + phone, code, props.sms().codeTtl());
         redis.opsForValue().set(CD_KEY + phone, "1", props.sms().resendInterval());
         try {
-            smsSender.send(phone, code);
+            smsClient.sendLoginCode(phone, code);
         } catch (RuntimeException e) {
             // 投递失败即回滚：不能让用户对着收不到的码，还被冷却锁住
             redis.delete(CODE_KEY + phone);

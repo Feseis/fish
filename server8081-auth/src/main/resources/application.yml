@@ -33,9 +33,6 @@ auth:
   cookie:
     secure: false
   sms:
+    base-url: ${SMS_SERVICE_URL}
     code-ttl: 5m
     resend-interval: 60s
-    pbox:
-      base-url: ${PBOX_BASE_URL}
-      sender-phone: ${PBOX_SENDER_PHONE}
-      api-code: ${PBOX_API_CODE}

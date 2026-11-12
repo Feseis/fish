@@ -16,14 +16,14 @@ public class AuthBeanConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /** pbox 投递客户端：超时压短，验证码接口不能被上游拖住。 */
+    /** 短信服务客户端：超时压短，验证码接口不能被上游拖住。 */
     @Bean
-    public RestClient pboxRestClient(AuthProperties props) {
+    public RestClient smsRestClient(AuthProperties props) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(2000);
         factory.setReadTimeout(3000);
         return RestClient.builder()
-                .baseUrl(props.sms().pbox().baseUrl())
+                .baseUrl(props.sms().baseUrl())
                 .requestFactory(factory)
                 .build();
     }
