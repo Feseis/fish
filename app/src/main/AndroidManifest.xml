@@ -64,6 +64,13 @@
         <activity
             android:name=".PoiPickerActivity"
             android:exported="false" />
+        <activity
+            android:name=".OrderCreateActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AddressEntryActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

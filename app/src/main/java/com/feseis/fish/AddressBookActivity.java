@@ -1,5 +1,7 @@
 package com.feseis.fish;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -30,11 +32,18 @@ import java.util.List;
 
 /**
  * 地址簿：默认地址置顶，支持新增、编辑、删除与设为默认。
+ * 从首页进入时为选择模式：点条目直接返回地址。
  */
 public class AddressBookActivity extends AppCompatActivity implements AddressAdapter.Listener {
 
     private static final int MENU_SET_DEFAULT = 1;
     private static final int MENU_DELETE = 2;
+
+    public static final String EXTRA_ADDRESS = "extra_picked_address";
+    public static final String EXTRA_PICK_TARGET = "extra_pick_target";
+    public static final int TARGET_NONE = 0;
+    public static final int TARGET_SENDER = 1;
+    public static final int TARGET_RECEIVER = 2;
 
     private LogisticsApi api;
     private AddressAdapter adapter;
@@ -43,6 +52,13 @@ public class AddressBookActivity extends AppCompatActivity implements AddressAda
     private CircularProgressIndicator progress;
 
     private String accountId = "";
+    private int pickTarget = TARGET_NONE;
+
+    public static Intent newPickIntent(Context context, int target) {
+        Intent intent = new Intent(context, AddressBookActivity.class);
+        intent.putExtra(EXTRA_PICK_TARGET, target);
+        return intent;
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,6 +81,14 @@ public class AddressBookActivity extends AppCompatActivity implements AddressAda
             return;
         }
         this.accountId = session.getAccountId();
+        this.pickTarget = this.getIntent().getIntExtra(EXTRA_PICK_TARGET, TARGET_NONE);
+
+        TextView title = this.findViewById(R.id.tv_address_book_title);
+        if (this.pickTarget == TARGET_SENDER) {
+            title.setText(R.string.address_pick_sender_title);
+        } else if (this.pickTarget == TARGET_RECEIVER) {
+            title.setText(R.string.address_pick_receiver_title);
+        }
 
         TextView back = this.findViewById(R.id.tv_address_book_back);
         back.setOnClickListener(v -> this.finish());
@@ -73,7 +97,7 @@ public class AddressBookActivity extends AppCompatActivity implements AddressAda
         this.emptyView = this.findViewById(R.id.layout_address_empty);
         this.progress = this.findViewById(R.id.progress_address_book);
 
-        this.adapter = new AddressAdapter(this);
+        this.adapter = new AddressAdapter(this, this.pickTarget != TARGET_NONE);
         this.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         this.recyclerView.setAdapter(this.adapter);
 
@@ -107,6 +131,14 @@ public class AddressBookActivity extends AppCompatActivity implements AddressAda
 
     @Override
     public void onEdit(UserAddress address) {
+        if (this.pickTarget != TARGET_NONE) {
+            Intent data = new Intent();
+            data.putExtra(EXTRA_ADDRESS, address);
+            data.putExtra(EXTRA_PICK_TARGET, this.pickTarget);
+            this.setResult(RESULT_OK, data);
+            this.finish();
+            return;
+        }
         this.startActivity(AddressEditActivity.newIntent(this, address));
     }
 

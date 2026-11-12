@@ -26,10 +26,12 @@ public final class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.Ho
 
     private final List<UserAddress> items = new ArrayList<>();
     private final Listener listener;
+    private final boolean pickMode;
     private String defaultId = "";
 
-    public AddressAdapter(Listener listener) {
+    public AddressAdapter(Listener listener, boolean pickMode) {
         this.listener = listener;
+        this.pickMode = pickMode;
     }
 
     public void submit(List<UserAddress> addresses, String defaultId) {
@@ -76,6 +78,7 @@ public final class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.Ho
         holder.defaultBadge.setVisibility(isDefault ? View.VISIBLE : View.GONE);
 
         holder.itemView.setOnClickListener(v -> this.listener.onEdit(address));
+        holder.more.setVisibility(this.pickMode ? View.GONE : View.VISIBLE);
         holder.more.setOnClickListener(v -> this.listener.onMore(v, address));
     }
 
