@@ -11,6 +11,7 @@ java {
 
 dependencies {
     implementation(project(":contract"))
+    implementation(project(":sms-api"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:4.1.0")
