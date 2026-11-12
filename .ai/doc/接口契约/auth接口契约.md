@@ -27,6 +27,7 @@
 | `/auth/login/sms` | POST | 已实现 | 手机号 + 验证码登录，签发短期令牌与 refresh |
 | `/auth/refresh` | POST | 已实现 | 读 refresh cookie，签发新短期令牌；refresh 不轮换 |
 | `/auth/logout` | POST | 已实现 | 结束会话并吊销请求携带的短期令牌，清 cookie；幂等 |
+| `/auth/password/reset` | POST | 已实现 | 手机号 + 短信验证码重置密码；`pwd_version + 1` 使旧 refresh 失效 |
 | `/auth/internal/audit/waybill-cancel` | POST | 已实现（占位） | 运单取消审核，当前固定返回 `approved=true`，不校验入参 |
 | `/auth/internal/audit/staff-apply` | POST | 已实现（占位） | 员工入职审核，当前固定返回 `approved=true`，不校验入参 |
 | `/auth/internal/verify` | POST | 已实现 | 内部接口：校验短期令牌，返回 `sessionId`、`accountId`、`roles`；供其他服务调用 |
@@ -40,6 +41,22 @@
 不再复核账号状态与密码版本，冻结/改密的收敛点在 `/auth/refresh`。
 
 规划中接口在实现前不得被前端按已完成对接。
+
+### 2.1 重置密码
+
+`POST /auth/password/reset`
+
+```json
+{"phone":"13606666666","code":"123456","newPassword":"abc123"}
+```
+
+| 字段 | 必填 | 说明 |
+| --- | --- | --- |
+| `phone` | 是 | 11 位手机号 |
+| `code` | 是 | 6 位短信验证码，校验成功即核销 |
+| `newPassword` | 是 | 非空，最多 64 位 |
+
+成功返回 200 空体。验证码错误或过期返回 401 `SMS_WRONG` / `SMS_EXPIRED`；账号不存在返回 401 `NO_ACCOUNT`；冻结或注销返回 403 `FROZEN` / `CLOSED`。更新密码时 `pwd_version + 1`，旧 refresh 在续期时失效，当前 access 到期后失效。
 
 ## 3 响应约定
 

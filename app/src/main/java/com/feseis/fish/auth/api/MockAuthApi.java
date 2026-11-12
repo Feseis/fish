@@ -44,6 +44,28 @@ public final class MockAuthApi implements AuthApi {
     }
 
     @Override
+    public void resetPassword(String phone, String code, String newPassword,
+                              ApiCallback<Void> callback) {
+        if (MOCK_EXPIRED_SMS_CODE.equals(code)) {
+            this.reply(MockAuthApi.<Void>failure(AuthError.SMS_EXPIRED, "验证码已过期"), callback);
+            return;
+        }
+        if (!MOCK_SMS_CODE.equals(code)) {
+            this.reply(MockAuthApi.<Void>failure(AuthError.SMS_WRONG, "验证码错误"), callback);
+            return;
+        }
+        if (MOCK_FROZEN_PHONE.equals(phone)) {
+            this.reply(MockAuthApi.<Void>failure(AuthError.FROZEN, "账号已冻结"), callback);
+            return;
+        }
+        if (MOCK_CLOSED_PHONE.equals(phone)) {
+            this.reply(MockAuthApi.<Void>failure(AuthError.CLOSED, "账号已注销"), callback);
+            return;
+        }
+        this.reply(ApiResult.<Void>success(null), callback);
+    }
+
+    @Override
     public void register(String phone, String code, String password, String confirmPassword,
                          ApiCallback<LoginResult> callback) {
         if (MOCK_EXPIRED_SMS_CODE.equals(code)) {

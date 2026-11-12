@@ -9,12 +9,14 @@ import me.feseis.fish.contract.AuthHeaders;
 import me.feseis.fish.auth.vo.login.LoginOnPasswordReqVO;
 import me.feseis.fish.auth.vo.login.LoginOnPhoneOnlyReqVO;
 import me.feseis.fish.auth.vo.login.LoginRespVO;
+import me.feseis.fish.auth.vo.password.ResetPasswordReqVO;
 import me.feseis.fish.auth.vo.refresh.RefreshRespVO;
 import me.feseis.fish.auth.vo.register.RegisterReqVO;
 import me.feseis.fish.auth.vo.sms.SendSmsCodeReqVO;
 import me.feseis.fish.auth.vo.verify.VerifyRespVO;
 import me.feseis.fish.auth.config.properties.AuthProperties;
 import me.feseis.fish.auth.service.AuthService;
+import me.feseis.fish.auth.service.PasswordResetService;
 import me.feseis.fish.auth.service.RegisterService;
 import me.feseis.fish.auth.service.SessionService;
 import me.feseis.fish.auth.service.SmsCodeService;
@@ -41,6 +43,7 @@ public class AuthController {
     private final RegisterService registerService;
     private final AuthService authService;
     private final SessionService sessionService;
+    private final PasswordResetService passwordResetService;
     private final AuthProperties props;
 
     @PostMapping("/get-sms-code")
@@ -83,6 +86,12 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie("", Duration.ZERO).toString())
                 .build();
+    }
+
+    @PostMapping("/password/reset")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordReqVO req) {
+        passwordResetService.reset(req);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/verify")

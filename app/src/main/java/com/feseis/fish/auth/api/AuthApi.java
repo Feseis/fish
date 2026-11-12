@@ -24,6 +24,8 @@ public interface AuthApi {
 
     void logout(ApiCallback<Void> callback);
 
+    void resetPassword(String phone, String code, String newPassword, ApiCallback<Void> callback);
+
     void verify(ApiCallback<VerifyResult> callback);
 
     void checkHealth(ApiCallback<HealthResult> callback);

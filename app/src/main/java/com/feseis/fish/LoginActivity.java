@@ -109,6 +109,11 @@ public class LoginActivity extends AppCompatActivity {
         this.loginButton = this.findViewById(R.id.btn_login);
         this.loginProgress = this.findViewById(R.id.progress_login);
         this.registerEntry = this.findViewById(R.id.tv_register);
+        this.findViewById(R.id.tv_login_forgot).setOnClickListener(v -> {
+            Intent intent = new Intent(this, ForgotPasswordActivity.class);
+            intent.putExtra(ForgotPasswordActivity.EXTRA_PHONE, this.phone());
+            this.startActivity(intent);
+        });
     }
 
     private void setupModeSwitch() {

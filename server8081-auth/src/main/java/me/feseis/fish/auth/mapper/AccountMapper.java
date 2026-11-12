@@ -9,6 +9,7 @@ import me.feseis.fish.auth.mapper.model.PasswordRow;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 public interface AccountMapper {
 
@@ -58,4 +59,9 @@ public interface AccountMapper {
     @Insert("INSERT INTO auth_account_role (auth_account_id, auth_role_id) VALUES (#{accountId}, #{roleId}) "
             + "ON DUPLICATE KEY UPDATE granted_at = granted_at")
     int grantRoleIfAbsent(@Param("accountId") String accountId, @Param("roleId") int roleId);
+
+    @Update("UPDATE auth_password SET password_hash = #{passwordHash}, hash_algo = 'BCRYPT', "
+            + "pwd_version = pwd_version + 1 WHERE auth_account_id = #{accountId}")
+    int updatePassword(@Param("accountId") String accountId,
+                       @Param("passwordHash") String passwordHash);
 }

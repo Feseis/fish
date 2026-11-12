@@ -116,6 +116,17 @@ public final class HttpAuthApi implements AuthApi {
     }
 
     @Override
+    public void resetPassword(String phone, String code, String newPassword,
+                              ApiCallback<Void> callback) {
+        JSONObject body = new JSONObject();
+        put(body, "phone", phone);
+        put(body, "code", code);
+        put(body, "newPassword", newPassword);
+        this.call("POST", "/auth/password/reset", body, false, false,
+                json -> (Void) null, callback);
+    }
+
+    @Override
     public void verify(ApiCallback<VerifyResult> callback) {
         this.call("POST", "/auth/verify", null, true, false, json -> new VerifyResult(
                 json.optString("sessionId", ""),
