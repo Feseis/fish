@@ -49,8 +49,6 @@ public class PoiPickerActivity extends AppCompatActivity implements AMapLocation
     private CircularProgressIndicator progress;
     private TextInputEditText keywordInput;
     private PoiAdapter adapter;
-    /** 当前定位城市，用于限定关键字搜索范围；定位失败时为空。 */
-    private String city = "";
 
     private final ActivityResultLauncher<String[]> permissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
@@ -150,7 +148,6 @@ public class PoiPickerActivity extends AppCompatActivity implements AMapLocation
                 this.showError(R.string.address_picker_empty);
                 return;
             }
-            this.city = regeo.getCity() == null ? "" : regeo.getCity();
             String formatted = regeo.getFormattedAddress();
             this.statusView.setText(formatted == null || formatted.isEmpty()
                     ? this.getString(R.string.address_picker_nearby) : formatted);
@@ -160,7 +157,7 @@ public class PoiPickerActivity extends AppCompatActivity implements AMapLocation
         });
     }
 
-    /** 关键字搜索；city 非空时由后端限定城市。 */
+    /** 关键字搜索：不限定城市，跨城地址也能查到。 */
     private void search() {
         String keyword = this.keywordInput.getText() == null
                 ? "" : this.keywordInput.getText().toString().trim();
@@ -171,7 +168,7 @@ public class PoiPickerActivity extends AppCompatActivity implements AMapLocation
         this.statusView.setText(R.string.address_picker_searching);
         this.retryButton.setVisibility(View.GONE);
         this.progress.setVisibility(View.VISIBLE);
-        this.api.searchAddressPois(keyword, this.city, result -> {
+        this.api.searchAddressPois(keyword, "", result -> {
             this.progress.setVisibility(View.GONE);
             if (!result.isSuccess()) {
                 this.showError(R.string.address_picker_failed);

@@ -120,9 +120,9 @@
 
 `GET /logistics/address/search?keyword={keyword}&city={city}`，需 `Authorization: Bearer`。
 
-调用高德 `v3/place/text`（`offset=20`、`page=1`、`extensions=base`）；`city` 非空时附加 `citylimit=true` 限定城市。返回 `pois[]` 结构与 §4 一致，`adcode` 与省市区取自 POI 自身。
+调用高德 `v3/place/text`（`offset=20`、`page=1`、`extensions=all`）；`city` 非空时附加 `citylimit=true` 限定城市。返回 `pois[]` 结构与 §4 一致，`adcode` 与省市区取自 POI 自身。必须用 `extensions=all`：`base` 模式下 POI 的 `adcode` 返回空数组，结果会被后端全部丢弃。
 
-`keyword` 为空或超过 32 字返回 400 `INVALID_PARAM`；高德不可用返回 502 `AMAP_UNAVAILABLE`。每次调用消耗 1 次高德 Web 服务配额，客户端只在用户点击搜索时请求。
+`keyword` 为空或超过 32 字返回 400 `INVALID_PARAM`；高德不可用返回 502 `AMAP_UNAVAILABLE`。每次调用消耗 1 次高德 Web 服务配额，客户端只在用户点击搜索时请求。App 默认不传 `city`，按全国范围搜索，保证跨城寄件可查；`city` 保留给需要限定城市的调用方。
 
 ## 5 地址簿
 

@@ -79,6 +79,7 @@ public class AmapClient {
 
     /**
      * 关键字搜索，返回候选 POI；city 非空时用 citylimit=true 限定城市。
+     * 必须用 extensions=all：base 模式下 POI 的 adcode 返回空数组，会被解析层全部丢弃。
      */
     public List<AmapPoi> searchPlaces(String keyword, String city) {
         JsonNode root;
@@ -90,7 +91,7 @@ public class AmapClient {
                                 .queryParam("keywords", keyword)
                                 .queryParam("offset", POI_PAGE_SIZE)
                                 .queryParam("page", 1)
-                                .queryParam("extensions", "base");
+                                .queryParam("extensions", "all");
                         if (city != null && !city.isBlank()) {
                             builder.queryParam("city", city).queryParam("citylimit", "true");
                         }
